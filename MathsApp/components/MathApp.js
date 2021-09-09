@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {NumberElement} from './NumberElement';
 import {Result} from './Result';
 import {styles} from './Styles';
-import {getRandomInt, getRandomNumbers} from './MathFunctions';
+import {getRandomNumbers} from '../Functions/MathFunctions';
 import AsyncStorage from '@react-native-community/async-storage';
 import {Avatar, Badge, Icon, withBadge} from 'react-native-elements';
 import {FAB} from 'react-native-paper';
@@ -17,9 +17,10 @@ import {
   getData,
   createTable,
   deleteTable,
-  models,
-} from '../SqlFunctions';
-
+  storeData,
+} from '../Functions/SqlFunctions';
+import {models} from '../Data/Models';
+import {operations, levels} from '../Data/Data';
 import {
   Button,
   StyleSheet,
@@ -34,19 +35,21 @@ import {
 } from 'react-native';
 // import Fireworks from '../../Animations/FireWorks';
 
-export const MathApp = ({user, operation, level}) => {
+const MathApp = ({user, stackdata, operation}) => {
   // const levels = ['1', '2', '3', '4', '5'];
-  const storeData = async (objname, obj) => {
+
+  const asyncStoreData = async (objname, obj) => {
     try {
       await AsyncStorage.setItem(objname, JSON.stringify(obj));
       console.log('Data saving done');
     } catch (e) {
       console.log('Data not set');
-      storeData(objname, obj);
+      asyncStoreData(objname, obj);
       // saving error
     }
   };
-
+  var localperations = {};
+  operations.map(k => (localperations[k.name] = k.id));
   const removeItemValue = async key => {
     try {
       await AsyncStorage.removeItem(key);
@@ -57,47 +60,25 @@ export const MathApp = ({user, operation, level}) => {
   };
   // removeItemValue('scores')
 
-  const levels = [
-    {level: 0, ndigits: 1},
-    {level: 1, ndigits: 2},
-    {level: 2, ndigits: 2},
-    {level: 3, ndigits: 2},
-    {level: 4, ndigits: 3},
-  ];
-  const scoreformat = [
-    'child_id',
-    'op_type',
-    'level',
-    'start_time',
-    'time_taken',
-    'passed',
-  ];
-  let op_type_defs = {
-    Addition: 1,
-    Subtraction: 2,
-    Multiplication: 3,
-    Division: 4,
-    Comparisons: 5,
-  };
   var firstscores = [];
 
   const print = myarray => {
     myarray.map(k => console.log(k, ','));
   };
   // print(['in mathapp',user_id, operation,level])
-
+  var stack_id = stackdata[stackdata.length - 1].stack_id + 1;
   const [count, setCount] = useState(1);
-  const [insidelevel, setLevel] = useState(levels[level]['level']);
+  const [locallevel, setLevel] = useState(levels[operation.level]['level']);
   const [start_time, setstart_time] = useState(new Date());
   const [completion_time, setcompletion_time] = useState(new Date());
   const [_c, set_c] = useState(1);
   const [scores, setScores] = useState([]);
-  let ndigits = levels[level]['ndigits'];
-  let randnumbs = getRandomNumbers(level, operation);
+  let ndigits = levels[operation.level]['ndigits'];
+  let randnumbs = getRandomNumbers(operation.level, operation.name);
 
-  const ResultNumber = (randnumbs, operation) => {
+  const ResultNumber = (randnumbs, operation_name) => {
     let resnumber = 0;
-    switch (operation) {
+    switch (operation_name) {
       case 'Addition':
         resnumber = randnumbs[0] + randnumbs[1];
         break;
@@ -113,12 +94,12 @@ export const MathApp = ({user, operation, level}) => {
     return resnumber;
   };
 
-  let resnumber = ResultNumber(randnumbs, operation);
+  let resnumber = ResultNumber(randnumbs, operation.name);
   let nrdigits = resnumber.toString().length;
 
   const [isDialogVisible, setIsDialogVisible] = useState(false);
 
-  const [dialoginput, setDialoginput] = useState(0);
+  const [numberOps, setnumberOps] = useState(0);
 
   const [randomnumbers, setrandomnumbers] = useState(randnumbs);
   const [resultnumber, setresultnumber] = useState(resnumber);
@@ -126,6 +107,14 @@ export const MathApp = ({user, operation, level}) => {
   const [isRightGuesses, setisRightGuesses] = useState(
     new Array(nrdigits).fill(false),
   );
+
+  var localstack = {
+    stack_id: stack_id,
+    operation_id: operation.id,
+    date: new Date().toJSON(),
+    level: locallevel,
+    parent_id: user.id,
+  };
   useEffect(() => {
     const fetchData = async () => {
       await AsyncStorage.getItem('scores')
@@ -138,6 +127,8 @@ export const MathApp = ({user, operation, level}) => {
       console.log('loading data');
     }, 50);
     return () => clearTimeout(timer);
+
+    // getData(db, 'Users', ['id', 'name', 'dob', 'ischild'], setUserdata);
   }, []);
 
   useEffect(() => {
@@ -147,38 +138,42 @@ export const MathApp = ({user, operation, level}) => {
     scores.length > 0
       ? (_c1 = scores.filter(
           k =>
-            k[2] == level && k[0] == user.id && k[1] == op_type_defs[operation],
+            k[2] == operation.level &&
+            k[0] == user.id &&
+            k[1] == localperations[operation.name],
         ).length)
       : null;
     setCount(_c1 + 1);
   }, [scores]);
+
   useEffect(() => {
     refreshPage();
-  }, [insidelevel]);
+  }, [locallevel]);
 
   function refreshPage() {
-    randnumbs = getRandomNumbers(level, operation);
-    resnumber = ResultNumber(randnumbs, operation);
+    randnumbs = getRandomNumbers(operation.level, operation.name);
+    resnumber = ResultNumber(randnumbs, operation.name);
     nrdigits = resnumber.toString().length;
     setrandomnumbers(randnumbs);
     setresultnumber(resnumber);
     setguessdigits(new Array(nrdigits).fill(0));
     setisRightGuesses(new Array(nrdigits).fill(false));
-    // scores.push([user_id, op_type_defs[operation],level,start_time.toJSON(),completion_time-start_time,true])
+    // scores.push([user_id, operations[operation],level,start_time.toJSON(),completion_time-start_time,true])
     setScores([
       ...scores,
       [
         user.id,
-        op_type_defs[operation],
-        level,
+        localperations[operation.name],
+        operation.level,
         start_time.toJSON(),
         completion_time - start_time,
         true,
       ],
     ]);
+
     const timer = setTimeout(() => {
       // console.log('giving time to store')
-      storeData('scores', scores);
+      asyncStoreData('scores', scores);
       // console.log('After save',scores)
     }, 50);
 
@@ -192,7 +187,7 @@ export const MathApp = ({user, operation, level}) => {
       source={require('../assets/dark_bg.png')}
       style={{width: '100%', height: '100%'}}>
       <View style={styles.container}>
-        <Text style={styles.heading}>{operation}</Text>
+        <Text style={styles.heading}>{operation.name}</Text>
         <View style={styles.line} />
         <View style={styles.mathcontainer}>
           <ImageBackground
@@ -204,7 +199,7 @@ export const MathApp = ({user, operation, level}) => {
               <NumberElement
                 mystyles={styles}
                 randomnumbers={randomnumbers}
-                operation={operation}
+                operation={operation.name}
               />
               <View style={styles.line50} />
               <Result
@@ -229,15 +224,20 @@ export const MathApp = ({user, operation, level}) => {
 
       <View style={styles.score}>
         <View style={styles.levelfab}>
-          {user.isc}
-          <ModalDropdown
-            style={{alignSelf: 'center', fontSize: 20}}
-            defaultValue={'Level 2'}
-            options={levels.map(l => 'Level ' + (l.level + 1).toString())}
-            onSelect={(idx, value) =>
-              setLevel(parseInt(value.substring(5, 7)) - 1)
-            }
-          />
+          {!user.ischild ? (
+            <ModalDropdown
+              style={{alignSelf: 'center', fontSize: 20}}
+              defaultValue={'Level 2'}
+              options={levels.map(l => 'Level ' + (l.level + 1).toString())}
+              onSelect={(idx, value) =>
+                setLevel(parseInt(value.substring(5, 7)) - 1)
+              }
+            />
+          ) : (
+            <Text style={{alignSelf: 'center', fontSize: 15}}>
+              {'Level ' + localstack.level}
+            </Text>
+          )}
         </View>
         <View>
           <View style={{flexDirection: 'row'}}>
@@ -288,21 +288,44 @@ export const MathApp = ({user, operation, level}) => {
           <Text>+ Stack</Text>
         </TouchableHighlight>
       ) : null}
-      <Text>{dialoginput + ' ' + insidelevel}</Text>
+      {/* <Text>{numberOps + ' ' + locallevel}</Text> */}
       <DialogInput
         isDialogVisible={isDialogVisible}
-        title={operation + 's : level: ' + (insidelevel + 1)}
+        title={operation.name + 's : level: ' + (locallevel + 1)}
         message={'Set number of operations for stack'}
         hintInput={'Number'}
         textInputProps={{keyboardType: 'numeric'}}
         submitInput={inputText => {
-          setDialoginput(inputText);
+          setnumberOps(inputText);
           console.log('input set');
+
+          storeData(db, 'Stack', localstack, ['date']);
           setIsDialogVisible(false);
+          return navigation.navigate('ParentGamesScreen', {
+            user: user,
+            userdata: userdata,
+            stackdata: stackdata,
+            // user_id: parentdata.id,
+            // user_name: parentdata.name,
+            // ischild: parentdata.ischild,
+          });
         }}
         closeDialog={() => {
           setIsDialogVisible(false);
-        }}></DialogInput>
+        }}>
+        {' '}
+      </DialogInput>
     </ImageBackground>
   );
+};
+
+export const MathScreen = ({navigation, route}) => {
+  const {user, stackdata, operation} = route.params;
+  console.log(
+    'in MathScreen  user,stackdata, operation',
+    user,
+    stackdata,
+    operation,
+  );
+  return <MathApp user={user} stackdata={stackdata} operation={operation} />;
 };

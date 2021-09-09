@@ -3,21 +3,26 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import UserHomeScreen from './Registration/UserHomeScreen';
 import GamesScreen from './GameScreen';
-// import LevelScreen from './LevelScreen';
-import {MathApp} from './MathApp';
+import ParentGamesScreen from './ParentGamesScreen';
+import {MathScreen} from './MathApp';
 
 const Stack = createStackNavigator();
-
-const MathScreen = ({navigation, route}) => {
-  const {user, operation, level} = route.params;
-  console.log('in MathScreen', user, operation, level);
-  return <MathApp level={level} user={user} operation={operation} />;
-};
 
 const MyWelcomeScreen = () => {
   const [iserror, setiserror] = useState(null);
   const [users, setUsers] = useState({});
-
+  // return (
+  //   <>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //     <Text>Hello</Text>
+  //   </>
+  // );
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -31,7 +36,13 @@ const MyWelcomeScreen = () => {
           name="GamesScreen"
           component={GamesScreen}
           options={{title: 'Select an Operation'}}
-          initialParams={{user: {}}}
+          initialParams={{user: {}, stackdata: {}}}
+        />
+        <Stack.Screen
+          name="ParentGamesScreen"
+          component={ParentGamesScreen}
+          options={{title: 'Set operations'}}
+          initialParams={{user: {}, stackdata: {}}}
         />
 
         {/* <Stack.Screen
@@ -46,6 +57,7 @@ const MyWelcomeScreen = () => {
           options={{title: 'Maths Operation'}}
           initialParams={{
             user: {},
+            stackdata: {},
             operation: 'Addition',
             level: 0,
           }}

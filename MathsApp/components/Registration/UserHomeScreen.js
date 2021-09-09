@@ -1,12 +1,6 @@
 import {
-  Image,
   Text,
   ImageBackground,
-  View,
-  ScrollView,
-  KeyboardAvoidingView,
-  Alert,
-  SafeAreaView,
   TouchableHighlight,
   RoundButton,
 } from 'react-native';
@@ -23,13 +17,13 @@ import GamesScreen from '../GameScreen';
 import {FAB} from 'react-native-paper';
 import {
   db,
-  user,
   getData,
   createTable,
   deleteTable,
-  models,
-} from '../SqlFunctions';
-
+  storeData,
+} from '../../Functions/SqlFunctions';
+import {user, models} from '../../Data/Models';
+import {operations} from '../../Data/Data';
 // const styles = StyleSheet.create({
 
 // });
@@ -42,53 +36,150 @@ var person = {
   coins: 0,
   ischild: null,
 };
-
+var todo = [
+  {
+    childid: 0,
+    arith_type: '',
+    level: 0,
+    n_of_probs: 20,
+    set_date: 0,
+    target_date: 0,
+  },
+];
+var score = [
+  {
+    childid: 0,
+    arith_type: '',
+    level: 0,
+    start_time: 0,
+    end_time: 0,
+    passed: false,
+  },
+];
+var child_stack = {
+  stack_id: 0,
+  child_id: null,
+  date: new Date().toJSON(),
+};
+var stack = {
+  id: 0,
+  stack_id: 0,
+  operation_id: 0,
+  date: new Date().toJSON(),
+  level: 1,
+  parent_id: 0,
+  num_problems: 20,
+};
 const tableobject = {Users: user};
+const tablestackobject = {Stack: models['Stack']};
 const UserHomeScreen = ({navigation}) => {
-  const [userdata, setUserdata] = useState([
-    {id: 0, name: 'No user data in Database'},
-  ]);
-  const [parentdata, setParentdata] = useState('');
+  const [userdata, setUserdata] = useState(''); //{id: null, name: 'Notset', ischild: false},
 
+  const [childstackdata, setChildstackdata] = useState(child_stack);
+  const [stackdata, setStackdata] = useState('');
+  const [isuserdatadataloaded, setIsuserdatadataloaded] = useState(false);
+
+  const storeInitialStack = () => {
+    operations.map(k => {
+      stack['operation_id'] = k.id;
+      // console.log('############in storeInitialStack', stack);
+      storeData(db, 'Stack', stack, ['date'], true);
+      stack['id'] += 1;
+    });
+  };
   useEffect(() => {
     // deleteTable(db, tableobject);
-    createTable(db, models);
-    // createScoresTable(db);
-    try {
-      getData(db, 'Users', ['id', 'name', 'dob', 'ischild'], setUserdata);
-    } catch (e) {
+    deleteTable(db, tablestackobject);
+    async function loadDataAsync() {
       createTable(db, models);
+      // createScoresTable(db);
+      try {
+        getData(
+          db,
+          'Users',
+          ['id', 'name', 'dob', 'ischild'],
+          setUserdata,
+          'from userhomescreen',
+        );
+      } catch (e) {
+        createTable(db, models);
+      }
+
+      try {
+        getMaxvalueData(
+          db,
+          'Stack',
+          [
+            'id',
+            'user_id',
+            'operation_id',
+            'date',
+            'level',
+            'parent_id',
+            'num_problems',
+          ],
+          setStackdata,
+          'stack_id', //maxval_key
+          'from userhomescreen Stack',
+        );
+        console.log('done inside get data from child and stackdata');
+      } catch (e) {
+        storeInitialStack();
+        console.log('Getdata error occured');
+      }
+    }
+    loadDataAsync();
+    if (userdata) {
+      setIsuserdatadataloaded(true);
     }
 
-    console.log('in use effect ', userdata);
-    userdata.filter(k => !k.ischild).length > 0
-      ? setParentdata(userdata.filter(k => !k.ischild)[0])
-      : null;
+    //
   }, []);
+  const ParentComp = ({isuserdatadataloaded, userdata}) => {
+    const [parentdata, setParentdata] = useState(null);
+    if (isuserdatadataloaded) {
+      console.log('in isuserdatadataloaded', userdata);
+      userdata.filter(k => !k.ischild).length > 0
+        ? setParentdata(userdata.filter(k => !k.ischild)[0])
+        : null;
+    }
+    return (
+      <TouchableHighlight
+        style={styles.fab}
+        onPress={() => {
+          // console.log(' clicked on parent stackdata', stackdata);
+          return navigation.navigate('ParentGamesScreen', {
+            user: parentdata,
+            userdata: userdata,
+            stackdata: stackdata,
+            // user_id: parentdata.id,
+            // user_name: parentdata.name,
+            // ischild: parentdata.ischild,
+          });
+        }}>
+        <Text style={{alignSelf: 'center', color: '#fff', paddingTop: 10}}>
+          Parent
+        </Text>
+      </TouchableHighlight>
+    );
+  };
 
-  var todo = [
-    {
-      childid: 0,
-      arith_type: '',
-      level: 0,
-      n_of_probs: 20,
-      set_date: 0,
-      target_date: 0,
-    },
-  ];
-  var score = [
-    {
-      childid: 0,
-      arith_type: '',
-      level: 0,
-      start_time: 0,
-      end_time: 0,
-      passed: false,
-    },
-  ];
+  const ChildrenComp = () => {};
+
+  // useEffect(() => {
+  // stackdata.length ? null : storeInitialStack();
+
+  // }, [userdata]);
+
+  // useEffect(() => {
+
+  // }, [userdata]);
+
+  // console.log('stackdata ', stackdata);
 
   const [adduser, setAdduser] = useState(true); //Class of student
-  const Item = ({item}) =>
+
+  const Item = ({item, stackdata}) =>
     item.ischild ? (
       <TouchableHighlight
         style={styles.item}
@@ -96,30 +187,20 @@ const UserHomeScreen = ({navigation}) => {
         onPress={() =>
           navigation.navigate('GamesScreen', {
             user: item,
+            stackdata: stackdata,
           })
         }>
         <Text style={styles.title}>{item.name}</Text>
       </TouchableHighlight>
     ) : null;
-  const renderItem = ({item}) => <Item item={item} />;
-  // const renderItem1 = ({item}) => <Item name={item.name} />;
-  // getAll(db);
+  // const renderItem = ({item}) => <Item item={item} stackdata={stackdata} />;
+  const renderItem = ({item}) => <Item item={item} stackdata={stackdata} />;
 
   return (
     <>
       <ImageBackground
         source={require('../../assets/bg-colorvariant.png')}
         style={{flex: 1, padding: 5}}>
-        {/* <Image
-        source={require('../../assets/logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      /> */}
-        {/* <Text style={{alignSelf: 'center', fontSize: 30, color: '#4ce071'}}>
-        Welcome to Completekid
-      </Text> */}
-
-        {/* <SafeAreaView style={{flex: 1, alignSelf: 'center', height: 550}}> */}
         <FlatList
           style={{flex: 1}}
           data={userdata}
@@ -133,41 +214,17 @@ const UserHomeScreen = ({navigation}) => {
           setAdduser={setAdduser}
           setUserdata={setUserdata}
         />
+        <ParentComp
+          isuserdatadataloaded={isuserdatadataloaded}
+          userdata={userdata}
+        />
 
-        {/* <MyButton
-            title="RegistrationComponent"
-            customClick={() =>
-              navigation.navigate('RegistrationComponent', {tohide: adduser})
-            }
-          /> */}
-        {/* </ScrollView> */}
-
-        {/* </View> */}
-        {/* </SafeAreaView> */}
         <MyButton
           title="Add User"
           tohide={!adduser}
           customClick={() => setAdduser(!adduser)}
         />
-
-        {/* <Text>{allusers}</Text> */}
       </ImageBackground>
-      {parentdata ? (
-        <TouchableHighlight
-          style={styles.fab}
-          onPress={() => {
-            console.log(' clicked on parent');
-            return navigation.navigate('GamesScreen', {
-              user_id: parentdata.id,
-              user_name: parentdata.name,
-              ischild: parentdata.ischild,
-            });
-          }}>
-          <Text style={{alignSelf: 'center', color: '#fff', paddingTop: 10}}>
-            Parent
-          </Text>
-        </TouchableHighlight>
-      ) : null}
     </>
   );
 };

@@ -20,10 +20,10 @@ import {
   createUserTable,
   createScoresTable,
   deleteTable,
-  storeUserData,
+  storeData,
   getData,
-} from '../SqlFunctions';
-
+} from '../../Functions/SqlFunctions';
+import {class_options, operations} from '../../Data/Data';
 const RegistrationComponent = ({tohide, setAdduser, setUserdata}) => {
   const [allusers, setAllusers] = useState('initial');
 
@@ -36,22 +36,16 @@ const RegistrationComponent = ({tohide, setAdduser, setUserdata}) => {
   // }, []);
 
   const ClassComp = ({hide}) => {
-    const class_options = [
-      'Under KG',
-      '1st Class',
-      '2nd Class',
-      '3rd Class',
-      '4th Class',
-    ];
     if (hide) {
       return null;
     } else {
       return (
         <>
-          <Text style={styles.label}>Class</Text>
+          {/* <Text style={styles.label}>Class</Text> */}
           <View style={styles.dropdown}>
             <ModalDropdown
               style={styles.dropdown_2}
+              defaultValue={value}
               options={class_options}
               onSelect={(idx, value) => setValue(value)}
             />
@@ -69,7 +63,7 @@ const RegistrationComponent = ({tohide, setAdduser, setUserdata}) => {
   const [dob, setDob] = useState(new Date('2016-07-03'));
   // const [dor, setDor] = useState(new Date());
   const [name, setName] = useState('');
-  const [value, setValue] = useState('na'); //Class of student
+  const [value, setValue] = useState(class_options[0]); //Class of student
   // const [adduser, setAdduser] = useState(true); //Class of student
   var person = {
     name: name,
@@ -78,13 +72,41 @@ const RegistrationComponent = ({tohide, setAdduser, setUserdata}) => {
     dor: new Date(),
     ischild: !isparent,
   };
+  var stack = {
+    user_id: 0,
+    operation_id: 0,
+    date: new Date().toJSON(),
+    level: 1,
+    parent_id: null,
+  };
+  var child_stack = {
+    stack_id: 0,
+    child_id: null,
+    date: new Date().toJSON(),
+  };
+  const storeInitialStack2Children = () => {
+    userdata.filter(k => k.ischild);
+    operations.map(k => {
+      child_stack['child_id'] = k.id;
+      storeData(db, 'ChildStack', child_stack, ['date']);
+    });
+  };
+
   const register_user = () => {
     console.log('in register user!', person);
     // getAll(db, 'Users', ['name', 'dob', 'ischild', 'sclass']);
     person['dob'] = person.dob.toJSON();
     person['dor'] = person.dor.toJSON();
-    storeUserData(db, 'Users', person, ['name']);
-    getData(db, 'Users', ['id', 'name', 'dob', 'ischild'], setUserdata);
+    storeData(db, 'Users', person, ['name']);
+    getData(
+      db,
+      'Users',
+      ['id', 'name', 'dob', 'ischild'],
+      setUserdata,
+      'in registration register',
+    );
+    setValue(class_options[0]);
+
     // navigation.navigate('UserHomeScreen', {name: 'Home'});
     // navigation.goBack();
   };

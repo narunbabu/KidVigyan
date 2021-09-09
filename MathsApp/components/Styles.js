@@ -206,7 +206,7 @@ export const styles = StyleSheet.create({
     // top: 0,
     borderRadius: Math.round(windowWidth / 35),
     backgroundColor: '#afa',
-    padding: 2,
+    marginTop: 10,
   },
 
   tinyLogo: {
@@ -242,5 +242,15 @@ export const styles = StyleSheet.create({
   logo: {
     width: 66,
     height: 58,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  checkbox: {
+    alignSelf: 'center',
+  },
+  checkbox_label: {
+    margin: 8,
   },
 });

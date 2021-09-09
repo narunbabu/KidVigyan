@@ -2,17 +2,31 @@ import React, {useState, useEffect} from 'react';
 
 import {View} from 'react-native';
 import {MySurface} from './MySurface';
-import LevelScreen from './LevelScreen';
+import {operations} from '../Data/Data';
+// import LevelScreen from './LevelScreen';
 const GamesScreen = ({navigation, route}) => {
   const default_level = 2;
-  const {user} = route.params;
+  const {user, stackdata} = route.params;
   console.log('in GamesScreen', user);
-  LevelScreen;
-  const arithops = [
-    {name: 'Addition', operator: '+'},
-    {name: 'Subtraction', operator: '−'},
-    {name: 'Multiplication', operator: '×'},
-  ]; //,{name:'Division',operator:'÷'},{name:'Comparisons',operator:'='}]
+  console.log('in GamesScreen stackdata', stackdata);
+  var myoperations = [];
+  if (stackdata.length) {
+    stackdata.map(k => {
+      var obj = operations.filter(o => o.id == k.operation_id)[0];
+      ['level', 'num_problems'].map(key => {
+        obj[key] = k[key];
+      });
+      myoperations.push(obj);
+    });
+  } else {
+    operations.map(k => {
+      obj = k;
+      obj['level'] = 1;
+      obj['num_problems'] = 10;
+      myoperations.push(obj);
+    });
+  }
+
   console.log('clicked');
   return (
     <View
@@ -22,24 +36,17 @@ const GamesScreen = ({navigation, route}) => {
         alignSelf: 'center',
         justifyContent: 'center',
       }}>
-      {arithops.map(k => (
+      {myoperations.map(k => (
         <MySurface
           key={k.operator}
-          name={k.name}
-          symbol={k.operator}
-          // myfunc={()=> console.log('from welcome screen')}/>)}
-          // myfunc={() =>
-          //   navigation.navigate('LevelScreen', {
-          //     user_id: user_id,
-          //     user_name: user_name,
-          //     operation: k.name,
-          //   })
-          // }
+          // name={k.name}
+          // symbol={k.operator}
+          myprops={k}
           myfunc={() =>
             navigation.navigate('MathScreen', {
               user: user,
-              operation: k.name,
-              level: default_level,
+              stackdata: {},
+              operation: k,
             })
           }
         />
