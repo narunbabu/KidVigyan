@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS Stack (id INTEGER PRIMARY KEY AUTO_INCREMENT, stack_id INTEGER, operation_id INTEGER, date TEXT, level INTEGER, parent_id INTEGER, num_problems INTEGER );
