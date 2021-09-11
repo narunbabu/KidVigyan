@@ -13,7 +13,7 @@ const storeInitialStack = () => {
   });
 };
 
-const StoretheScore = props => {
+const StoretheScore = () => {
   const [scoredata, setScoredata] = useState([{date: 'hi'}]);
   const tablestackobject = {Score: models['Score']};
 
@@ -24,20 +24,22 @@ const StoretheScore = props => {
     var ndays = 40;
     var sampleperday = 40;
     // var scoredata = GenerateScore(startdate, ndays, sampleperday);
-    scoredata=[{
-      "child_id": 1,
-      "subject_id": 3,
-      "operation_id": 3,
-      "level": 4,
-      "date": "2021-08-31T11:12:30.097Z",
-      "time_taken": 48.419,
-      "mistypes": 0,
-      "score": 1000,
-      "passed": true
-      "points":200
-    }]
-    // storeDataArray(db, 'Score', scoredata);
-    storeData(db, 'Score', scoredata[0], 'date');
+    var mscoredata = [
+      {
+        child_id: 1,
+        subject_id: 3,
+        operation_id: 3,
+        level: 4,
+        date: '2021-08-31T11:12:30.097Z',
+        time_taken: 48.419,
+        mistypes: 0,
+        score: 1000,
+        passed: true,
+        points: 200,
+      },
+    ];
+    // storeDataArray(db, 'Score', mscoredata);
+    storeData(db, 'Score', mscoredata[0], 'date');
 
     // storeInitialStack();
   }, []);
