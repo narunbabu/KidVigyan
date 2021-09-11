@@ -1,5 +1,6 @@
 import {
   Text,
+  View,
   ImageBackground,
   TouchableHighlight,
   RoundButton,
@@ -21,9 +22,12 @@ import {
   createTable,
   deleteTable,
   storeData,
+  getDataWithextrafieldWithFilter,
 } from '../../Functions/SqlFunctions';
 import {user, models} from '../../Data/Models';
 import {operations} from '../../Data/Data';
+import ChildrenComp from './ChildrenComp';
+import UserChecklist from '../Gameselection/UserChecklist';
 // const styles = StyleSheet.create({
 
 // });
@@ -63,7 +67,7 @@ var child_stack = {
 };
 var stack = {
   id: 0,
-  stack_id: 0,
+  user_id: 0,
   operation_id: 0,
   date: new Date().toJSON(),
   level: 1,
@@ -73,9 +77,10 @@ var stack = {
 const tableobject = {Users: user};
 const tablestackobject = {Stack: models['Stack']};
 const UserHomeScreen = ({navigation}) => {
-  const [userdata, setUserdata] = useState(''); //{id: null, name: 'Notset', ischild: false},
+  const [adduser, setAdduser] = useState(true); //Class of student
+  const [userdata, setUserdata] = useState([]); //{id: null, name: 'Notset', ischild: false},
 
-  const [childstackdata, setChildstackdata] = useState(child_stack);
+  const [isstackdatadataloaded, setIsstackdatadataloaded] = useState(false);
   const [stackdata, setStackdata] = useState('');
   const [isuserdatadataloaded, setIsuserdatadataloaded] = useState(false);
 
@@ -89,24 +94,15 @@ const UserHomeScreen = ({navigation}) => {
   };
   useEffect(() => {
     // deleteTable(db, tableobject);
-    deleteTable(db, tablestackobject);
+    // deleteTable(db, tablestackobject);
+    // console.log(models['Stack']);
     async function loadDataAsync() {
-      createTable(db, models);
-      // createScoresTable(db);
-      try {
-        getData(
-          db,
-          'Users',
-          ['id', 'name', 'dob', 'ischild'],
-          setUserdata,
-          'from userhomescreen',
-        );
-      } catch (e) {
-        createTable(db, models);
-      }
+      // deleteTable(db, tablestackobject);
+      // createTable(db, models);
+      // storeInitialStack();
 
       try {
-        getMaxvalueData(
+        getData(
           db,
           'Stack',
           [
@@ -119,13 +115,42 @@ const UserHomeScreen = ({navigation}) => {
             'num_problems',
           ],
           setStackdata,
-          'stack_id', //maxval_key
+          // 'stack_id', //maxval_key
           'from userhomescreen Stack',
         );
         console.log('done inside get data from child and stackdata');
       } catch (e) {
-        storeInitialStack();
-        console.log('Getdata error occured');
+        createTable(db, models);
+      }
+    }
+    loadDataAsync();
+
+    if (stackdata) {
+      setIsstackdatadataloaded(true);
+    }
+
+    //
+  }, []);
+
+  useEffect(() => {
+    // deleteTable(db, tableobject);
+    // deleteTable(db, tablestackobject);
+    // console.log(models['Stack']);
+    async function loadDataAsync() {
+      // deleteTable(db, tablestackobject);
+      // createTable(db, models);
+      // storeInitialStack();
+
+      try {
+        getData(
+          db,
+          'Users',
+          ['id', 'name', 'dob', 'ischild'],
+          setUserdata,
+          'from userhomescreen',
+        );
+      } catch (e) {
+        createTable(db, models);
       }
     }
     loadDataAsync();
@@ -135,36 +160,54 @@ const UserHomeScreen = ({navigation}) => {
 
     //
   }, []);
+
+  // useEffect(() => {
+  //   // async function loadDataAsync() {
+  //   try {
+  //     getDataWithextrafieldWithFilter(
+  //       db,
+  //       'Users',
+  //       ['id', 'name', 'dob', 'ischild'],
+  //       setUserdata,
+  //       {isChecked: false}, //Extrafield to add
+  //       {ischild: 1}, //Filter on
+  //     );
+  //   } catch (e) {
+  //     console.warn(e);
+  //   }
+  //   // }
+  //   // loadDataAsync();
+  // }, []);
+
   const ParentComp = ({isuserdatadataloaded, userdata}) => {
     const [parentdata, setParentdata] = useState(null);
-    if (isuserdatadataloaded) {
-      console.log('in isuserdatadataloaded', userdata);
-      userdata.filter(k => !k.ischild).length > 0
-        ? setParentdata(userdata.filter(k => !k.ischild)[0])
-        : null;
-    }
-    return (
+    // if (isuserdatadataloaded) {
+    //   console.log('in isuserdatadataloaded', userdata);
+    useEffect(() => {
+      if (userdata) {
+        userdata.filter(k => !k.ischild).length > 0
+          ? setParentdata(userdata.filter(k => !k.ischild)[0])
+          : null;
+        console.log('stackdata', stackdata);
+      }
+    }, []);
+    // }
+    return userdata.filter(k => !k.ischild).length > 0 ? (
       <TouchableHighlight
         style={styles.fab}
         onPress={() => {
-          // console.log(' clicked on parent stackdata', stackdata);
           return navigation.navigate('ParentGamesScreen', {
-            user: parentdata,
+            user: userdata.filter(k => !k.ischild)[0],
             userdata: userdata,
             stackdata: stackdata,
-            // user_id: parentdata.id,
-            // user_name: parentdata.name,
-            // ischild: parentdata.ischild,
           });
         }}>
         <Text style={{alignSelf: 'center', color: '#fff', paddingTop: 10}}>
           Parent
         </Text>
       </TouchableHighlight>
-    );
+    ) : null;
   };
-
-  const ChildrenComp = () => {};
 
   // useEffect(() => {
   // stackdata.length ? null : storeInitialStack();
@@ -177,52 +220,34 @@ const UserHomeScreen = ({navigation}) => {
 
   // console.log('stackdata ', stackdata);
 
-  const [adduser, setAdduser] = useState(true); //Class of student
-
-  const Item = ({item, stackdata}) =>
-    item.ischild ? (
-      <TouchableHighlight
-        style={styles.item}
-        // onPress={() => console.log('clicked')}
-        onPress={() =>
-          navigation.navigate('GamesScreen', {
-            user: item,
-            stackdata: stackdata,
-          })
-        }>
-        <Text style={styles.title}>{item.name}</Text>
-      </TouchableHighlight>
-    ) : null;
-  // const renderItem = ({item}) => <Item item={item} stackdata={stackdata} />;
-  const renderItem = ({item}) => <Item item={item} stackdata={stackdata} />;
-
   return (
     <>
       <ImageBackground
         source={require('../../assets/bg-colorvariant.png')}
         style={{flex: 1, padding: 5}}>
-        <FlatList
-          style={{flex: 1}}
-          data={userdata}
-          // data={DATA}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-        />
+        {/* <UserChecklist userdata={userdata} setUserdata={setUserdata} /> */}
         {/* <ScrollView keyboardShouldPersistTaps="handled"> */}
+
+        <ChildrenComp
+          navigation={navigation}
+          userdata={userdata}
+          stackdata={stackdata}
+        />
+
         <RegistrationComponent
           tohide={adduser}
           setAdduser={setAdduser}
           setUserdata={setUserdata}
-        />
-        <ParentComp
-          isuserdatadataloaded={isuserdatadataloaded}
-          userdata={userdata}
         />
 
         <MyButton
           title="Add User"
           tohide={!adduser}
           customClick={() => setAdduser(!adduser)}
+        />
+        <ParentComp
+          isuserdatadataloaded={isuserdatadataloaded}
+          userdata={userdata}
         />
       </ImageBackground>
     </>

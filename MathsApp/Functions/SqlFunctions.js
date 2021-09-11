@@ -101,7 +101,7 @@ export const storeData = async (
     console.log(error);
   }
 };
-export const getDataLocal = (db, tablename, keys2retrieve) => {
+export const getDataLocal = (db, tablename, keys2retrieve, setUserData) => {
   var query = 'SELECT ';
   keys2retrieve.map(k => (query += k + ', '));
   query = query.substr(0, query.length - 2) + ' FROM ' + tablename;
@@ -118,9 +118,10 @@ export const getDataLocal = (db, tablename, keys2retrieve) => {
             // allusers += results.rows.item(i).name + ', ';
             keys2retrieve.map(k => (myarr[k] = results.rows.item(i)[k]));
             allusers.push(myarr);
-            console.log(allusers);
+            // console.log(allusers);
           }
-          return allusers;
+          // return allusers;
+          setUserData(allusers);
         }
       });
     });
@@ -166,9 +167,7 @@ export const getDataLocal = (db, tablename, keys2retrieve) => {
 export const getData = (db, tablename, keys2retrieve, setUserData, other) => {
   console.log('*******************start getdata', other);
   try {
-    let allusers = getDataLocal(db, tablename, keys2retrieve);
-
-    setUserData(allusers);
+    getDataLocal(db, tablename, keys2retrieve, setUserData);
   } catch (error) {
     console.log('error in set');
     console.log(error);

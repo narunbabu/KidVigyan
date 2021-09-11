@@ -160,13 +160,27 @@ const RegistrationComponent = ({tohide, setAdduser, setUserdata}) => {
             </View>
             <ClassComp hide={isparent} />
           </View>
-          <MyButton
-            title="Add"
-            customClick={() => {
-              register_user();
-              setAdduser(true);
-            }}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+
+              alignSelf: 'center',
+            }}>
+            <MyButton
+              title="Cancel"
+              customClick={() => {
+                setAdduser(true);
+              }}
+            />
+            <MyButton
+              title="Add"
+              color="green"
+              customClick={() => {
+                register_user();
+                setAdduser(true);
+              }}
+            />
+          </View>
         </KeyboardAvoidingView>
       </ScrollView>
     );

@@ -45,7 +45,7 @@ const GamesScreen = ({navigation, route}) => {
           myfunc={() =>
             navigation.navigate('MathScreen', {
               user: user,
-              stackdata: {},
+              stackdata: stackdata,
               operation: k,
             })
           }

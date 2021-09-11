@@ -12,7 +12,11 @@ const MyButton = props => {
           alignSelf: 'center',
         }}>
         <TouchableOpacity
-          style={styles.button}
+          style={
+            props.color
+              ? [styles.button, {backgroundColor: props.color}]
+              : styles.button
+          }
           onPress={props.customClick}
           useNativeDriver={true}>
           <Text style={styles.text}>{props.title}</Text>
