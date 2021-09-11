@@ -1,6 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {Text} from 'react-native';
-import {storeData, db} from '../Functions/SqlFunctions';
+import {
+  storeData,
+  db,
+  deleteTable,
+  createTable,
+} from '../Functions/SqlFunctions';
 
 import {user, models} from '../Data/Models';
 import {getDateScoredataperday, GenerateScore} from '../Data/GenerateScore';
