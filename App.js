@@ -16,6 +16,8 @@ import CheckBox from 'react-native-check-box';
 // import RApp from './RewardApp/RApp';
 import MyWelcomeScreen from './MathsApp/components/MyWelcomeScreen';
 import {db, getData} from './MathsApp/Functions/SqlFunctions';
+import UserTab from './MathsApp/components/Gameselection/UserTab';
+import ScoreApp from './MathsApp/ScoreApp/App';
 
 // import {DialogComponent, DialogTitle} from 'react-native-dialog-component';
 
@@ -24,7 +26,10 @@ const App = () => {
   return (
     // <Text>Hello </Text>
     // <UserNav />
-    <MyWelcomeScreen />
+    // <MyWelcomeScreen />
+    <ScoreApp />
+
+    // <UserTab />
 
     // <RApp />
     // <WaterPlanet />

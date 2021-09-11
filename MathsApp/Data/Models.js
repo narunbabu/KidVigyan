@@ -35,6 +35,7 @@ export const score = {
   passed: 'BOOLEAN',
   points: 'INTEGER',
 };
+
 export const subjects_operations = {
   id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
   subject_id: 'INTEGER',

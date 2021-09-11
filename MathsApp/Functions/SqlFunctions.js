@@ -101,6 +101,37 @@ export const storeData = async (
     console.log(error);
   }
 };
+
+// export const storeDataArray = async (db, tablename, objectArray) => {
+//   // var tablename = Object.keys(tableobject)[0];
+//   // Make sure your input data is consistent (integer, string etc.)
+//   console.log(
+//     'in set userdata**************************************************************',
+//   );
+//   var query = 'INSERT INTO ' + tablename + ' (';
+
+//   Object.keys(object).map(k => (query += k + ', '));
+//   query = query.substr(0, query.length - 2) + ' ) VALUES (';
+//   Object.keys(object).map(k => (query += '?, '));
+//   query = query.substr(0, query.length - 2) + ');';
+//   objectArray.forEach(object => {
+//     var values = [];
+//     Object.keys(object).map(k => values.push(object[k]));
+
+//     try {
+//       db.transaction(async tx => {
+//         // console.log('in setUserData', object);
+//         tx.executeSql(query, values);
+//       });
+//       console.log('set data complete');
+//       // navigation.navigate('Home');
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   });
+//   console.log('set data complete');
+// };
+
 export const getDataLocal = (db, tablename, keys2retrieve, setUserData) => {
   var query = 'SELECT ';
   keys2retrieve.map(k => (query += k + ', '));
