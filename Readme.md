@@ -13,3 +13,5 @@ const DEMO_OPTIONS_1 = ['option 1', 'option 2', 'option 3', 'option 4', 'option 
 <ModalDropdown style={styles.dropdown_6}
 options={DEMO_OPTIONS_1}
 onSelect={(idx, value) => this.\_dropdown_6_onSelect(idx, value)}>
+
+npx react-native link react-native-webview

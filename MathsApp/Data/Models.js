@@ -30,10 +30,10 @@ export const score = {
   operation_id: 'INTEGER',
   level: 'INTEGER',
   date: 'TEXT',
-  time_taken: 'INTEGER',
-  mistypes: 'INTEGER',
+  time_taken: 'FLOAT',
+  mistypes: 'FLOAT',
   passed: 'BOOLEAN',
-  points: 'INTEGER',
+  score: 'FLOAT',
 };
 
 export const subjects_operations = {

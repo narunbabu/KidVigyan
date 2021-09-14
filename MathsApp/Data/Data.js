@@ -35,6 +35,12 @@ export const operations = [
   // ,{name:'Division',operator:'÷',id:3},{name:'Comparisons',operator:'=',id:4}
   // ,{name:'Comparisons2',operator:'=1',id:5},{name:'Comparisons3',operator:'=2',id:6}
 ]; //]
+export const subjects = [
+  {
+    id: 0,
+    subject: 'Mathematics',
+  },
+];
 export const levels = [
   {level: 1, ndigits: 1},
   {level: 2, ndigits: 2},

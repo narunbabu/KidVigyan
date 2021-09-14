@@ -4,11 +4,85 @@ import {View} from 'react-native';
 import {MySurface} from './MySurface';
 import {operations} from '../Data/Data';
 // import LevelScreen from './LevelScreen';
+
+import {
+  db,
+  getData,
+  createTable,
+  deleteTable,
+  storeData,
+  getDataWithextrafieldWithFilter,
+} from '../Functions/SqlFunctions';
+import {user, models} from '../Data/Models';
+
+var stack = {
+  id: 0,
+  user_id: 0,
+  operation_id: 0,
+  date: new Date().toJSON(),
+  level: 1,
+  parent_id: 0,
+  num_problems: 20,
+};
+
 const GamesScreen = ({navigation, route}) => {
   const default_level = 2;
-  const {user, stackdata} = route.params;
+  const {user, stackdata, setStackdata} = route.params;
   console.log('in GamesScreen', user);
-  console.log('in GamesScreen stackdata', stackdata);
+  // console.log('in GamesScreen stackdata', stackdata);
+
+  useEffect(() => {
+    const storeInitialStack = () => {
+      operations.map(k => {
+        stack['operation_id'] = k.id;
+        console.log('############in storeInitialStack', stack);
+        storeData(db, 'Stack', stack, ['date'], true);
+        stack['id'] += 1;
+      });
+    };
+
+    setTimeout(() => {
+      if (stackdata) {
+        // setIsstackdatadataloaded(true);
+        console.log('stackdata loaded');
+      } else {
+        createTable(db, models);
+        storeInitialStack();
+      }
+    }, 20);
+  }, []);
+  if (stackdata) {
+    null;
+  } else {
+    useEffect(() => {
+      async function loadDataAsync() {
+        try {
+          getData(
+            db,
+            'Stack',
+            [
+              'id',
+              'user_id',
+              'operation_id',
+              'date',
+              'level',
+              'parent_id',
+              'num_problems',
+            ],
+            setStackdata,
+            // 'stack_id', //maxval_key
+            'from userhomescreen Stack',
+          );
+          console.log('done inside get data from child and stackdata');
+        } catch (e) {
+          null;
+        }
+      }
+      // loadDataAsync();
+      setTimeout(() => loadDataAsync(), 20);
+    }, []);
+  }
+
   var myoperations = [];
   if (stackdata.length) {
     stackdata.map(k => {

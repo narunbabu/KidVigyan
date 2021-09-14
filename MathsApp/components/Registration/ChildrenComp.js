@@ -5,7 +5,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator();
 import {styles} from './Styles';
 import {FlatList} from 'react-native';
-const ChildrenComp = ({navigation, userdata, stackdata}) => {
+
+const ChildrenComp = ({navigation, userdata, stackdata, setStackdata}) => {
   const [childrendata, setChildrendata] = useState(null);
 
   const Item = ({item, stackdata}) =>
@@ -16,13 +17,16 @@ const ChildrenComp = ({navigation, userdata, stackdata}) => {
           navigation.navigate('GamesScreen', {
             user: item,
             stackdata: stackdata,
+            setStackdata: setStackdata,
           })
         }>
         <Text style={styles.title}>{item.name}</Text>
       </TouchableHighlight>
     ) : null;
 
-  const renderItem = ({item}) => <Item item={item} stackdata={stackdata} />;
+  const renderItem = ({item}) => (
+    <Item item={item} stackdata={stackdata} setStackdata={setStackdata} />
+  );
 
   //   console.log('in isuserdatadataloaded', userdata);
   //   useEffect(() => {

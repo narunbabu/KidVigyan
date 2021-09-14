@@ -51,6 +51,7 @@ const GameSelect = () => {
     // }
     // loadDataAsync();
   }, []);
+
   const storeStack = () => {
     checkStack() ? console.log(selected) : null;
   };

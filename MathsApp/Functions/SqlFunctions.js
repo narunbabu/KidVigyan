@@ -65,9 +65,9 @@ export const storeData = async (
 ) => {
   // var tablename = Object.keys(tableobject)[0];
   // Make sure your input data is consistent (integer, string etc.)
-  console.log(
-    'in set userdata**************************************************************',
-  );
+  // console.log(
+  //   'in set userdata**************************************************************',
+  // );
   var query = 'INSERT INTO ' + tablename + ' (';
 
   Object.keys(object).map(k => (query += k + ', '));
@@ -79,7 +79,7 @@ export const storeData = async (
   usenotexist
     ? (query += 'WHERE NOT EXISTS (SELECT * FROM ' + tablename + ')')
     : null;
-  console.log(query, values);
+  // console.log(query, values);
   if (lengthcheckkeys.legth > 0) {
     for (let i = 0; i < lengthcheckkeys.legth; i++) {
       if (object[lengthcheckkeys[i]].length == 0) {
@@ -99,6 +99,35 @@ export const storeData = async (
     // navigation.navigate('Home');
   } catch (error) {
     console.log(error);
+  }
+};
+export const getDataTest = (db, tablename) => {
+  var query = 'SELECT * FROM ' + tablename;
+  console.log(query);
+  keys2retrieve = ['id'];
+  try {
+    db.transaction(tx => {
+      tx.executeSql(query, [], (tx, results) => {
+        var len = results.rows.length;
+        console.log('results.rows.length ', tablename, results.rows.length);
+        if (len > 0) {
+          var allusers = [];
+          for (let i = 0; i < len; i++) {
+            var myarr = {};
+
+            // allusers += results.rows.item(i).name + ', ';
+            keys2retrieve.map(k => (myarr[k] = results.rows.item(i)[k]));
+            allusers.push(myarr);
+          }
+          console.log(allusers[0]);
+        }
+      });
+    });
+  } catch (error) {
+    return error;
+    console.log('error in getDataTest');
+    // console.log(error);
+    // return [];
   }
 };
 
@@ -136,11 +165,12 @@ export const getDataLocal = (db, tablename, keys2retrieve, setUserData) => {
   var query = 'SELECT ';
   keys2retrieve.map(k => (query += k + ', '));
   query = query.substr(0, query.length - 2) + ' FROM ' + tablename;
-
+  // console.log(query);
   try {
     db.transaction(tx => {
       tx.executeSql(query, [], (tx, results) => {
         var len = results.rows.length;
+        console.log('results.rows.length ', tablename, results.rows.length);
         if (len > 0) {
           var allusers = [];
           for (let i = 0; i < len; i++) {
@@ -149,8 +179,8 @@ export const getDataLocal = (db, tablename, keys2retrieve, setUserData) => {
             // allusers += results.rows.item(i).name + ', ';
             keys2retrieve.map(k => (myarr[k] = results.rows.item(i)[k]));
             allusers.push(myarr);
-            // console.log(allusers);
           }
+          // console.log(allusers[0]);
           // return allusers;
           setUserData(allusers);
         }

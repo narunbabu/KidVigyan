@@ -25,7 +25,7 @@ import {
   getDataWithextrafieldWithFilter,
 } from '../../Functions/SqlFunctions';
 import {user, models} from '../../Data/Models';
-import {operations} from '../../Data/Data';
+
 import ChildrenComp from './ChildrenComp';
 import UserChecklist from '../Gameselection/UserChecklist';
 // const styles = StyleSheet.create({
@@ -84,22 +84,16 @@ const UserHomeScreen = ({navigation}) => {
   const [stackdata, setStackdata] = useState('');
   const [isuserdatadataloaded, setIsuserdatadataloaded] = useState(false);
 
-  const storeInitialStack = () => {
-    operations.map(k => {
-      stack['operation_id'] = k.id;
-      // console.log('############in storeInitialStack', stack);
-      storeData(db, 'Stack', stack, ['date'], true);
-      stack['id'] += 1;
-    });
-  };
   useEffect(() => {
     // deleteTable(db, tableobject);
     // deleteTable(db, tablestackobject);
     // console.log(models['Stack']);
     async function loadDataAsync() {
-      // deleteTable(db, tablestackobject);
       // createTable(db, models);
       // storeInitialStack();
+      // deleteTable(db, tablestackobject);
+      // createTable(db, models);
+      //
 
       try {
         getData(
@@ -120,16 +114,11 @@ const UserHomeScreen = ({navigation}) => {
         );
         console.log('done inside get data from child and stackdata');
       } catch (e) {
-        createTable(db, models);
+        null;
       }
     }
-    loadDataAsync();
-
-    if (stackdata) {
-      setIsstackdatadataloaded(true);
-    }
-
-    //
+    // loadDataAsync();
+    setTimeout(() => loadDataAsync(), 20);
   }, []);
 
   useEffect(() => {
@@ -153,10 +142,12 @@ const UserHomeScreen = ({navigation}) => {
         createTable(db, models);
       }
     }
-    loadDataAsync();
+
+    setTimeout(() => loadDataAsync(), 20);
     if (userdata) {
       setIsuserdatadataloaded(true);
     }
+    if (stackdata) setIsstackdatadataloaded(true);
 
     //
   }, []);
@@ -232,6 +223,7 @@ const UserHomeScreen = ({navigation}) => {
           navigation={navigation}
           userdata={userdata}
           stackdata={stackdata}
+          setStackdata={setStackdata}
         />
 
         <RegistrationComponent

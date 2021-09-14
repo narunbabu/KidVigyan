@@ -18,6 +18,7 @@ import MyWelcomeScreen from './MathsApp/components/MyWelcomeScreen';
 import {db, getData} from './MathsApp/Functions/SqlFunctions';
 import UserTab from './MathsApp/components/Gameselection/UserTab';
 import ScoreApp from './MathsApp/ScoreApp/App';
+import ParentApp from './MathsApp/components/Gameselection/App';
 
 // import {DialogComponent, DialogTitle} from 'react-native-dialog-component';
 
@@ -27,7 +28,8 @@ const App = () => {
     // <Text>Hello </Text>
     // <UserNav />
     // <MyWelcomeScreen />
-    <ScoreApp />
+    <ParentApp />
+    // <ScoreApp />
 
     // <UserTab />
 
